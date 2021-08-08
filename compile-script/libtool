@@ -1,0 +1,13 @@
+#!/bin/bash
+NowDir="$(dirname "$0")"
+OriginalTool=${NowDir}/libtool_origin
+
+. "$NowDir/sot_setup.sh"
+if [ $EnableSot -eq 1 ];then
+	. "$NowDir/sot_link.sh"
+else
+	. "$NowDir/sotcall_origin.sh"
+fi
+
+echo "error: shouldn't come here"
+exit 1

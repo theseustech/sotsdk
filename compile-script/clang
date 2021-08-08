@@ -1,0 +1,27 @@
+#!/bin/bash
+NowDir="$(dirname "$0")"
+OriginalTool=${NowDir}/clang_origin
+
+# exec -a $0 $OriginalTool "$@"
+. "$NowDir/sot_setup.sh"
+
+if [ $EnableSot -eq 1 ];then
+	if [ $bIsLinking -eq 1 ]; then
+		. "$NowDir/sot_link.sh"
+	else
+		echo "run sot clang compile"
+		
+		#compile out original objectfile to let xcode buildgraph work normally
+		CompileOriginArgs=("-o" "${AllArgsArr[$ArgOutputIndex]}")
+		"$NowDir/sotcall_exec.sh" "${ArgsPassToOrigin[@]}" "${CompileOriginArgs[@]}" "$OriginalTool" "$0"
+
+		SotBinOutputFile="$IntermediateOutputDir/$OutputFileNameNoExtension.sot"
+		BuildSotBinaryArgs=("-emit-llvm" "-o" "$SotBinOutputFile")
+		exec -a "$0" "$OriginalTool" "${ArgsPassToOrigin[@]}" "${BuildSotBinaryArgs[@]}"
+	fi
+else
+	. "$NowDir/sotcall_origin.sh"
+fi
+
+echo "error: shouldn't come here"
+exit 1

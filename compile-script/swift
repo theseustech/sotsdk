@@ -1,0 +1,33 @@
+#!/bin/bash
+NowDir="$(dirname "$0")"
+OriginalTool=${NowDir}/swift_origin
+
+#exec -a $0 $OriginalTool $@
+. "$NowDir/sot_setup.sh"
+
+if [ $EnableSot -eq 1 ];then
+  if [ ! $ArgOutputIndex -eq -1 ]; then
+    echo "run sot swift compile for file"
+    
+    #compile out original objectfile to let xcode buildgraph work normally
+    CompileOriginArgs=("-o" "${AllArgsArr[$ArgOutputIndex]}")
+    "$NowDir/sotcall_exec.sh" "${ArgsPassToOrigin[@]}" "${CompileOriginArgs[@]}" "$OriginalTool" "$0"
+
+    SotBinOutputFile="$IntermediateOutputDir/$OutputFileNameNoExtension.sot"
+    BuildSotBinaryArgs=("-Xfrontend" "-emit-bc" "-o" "$SotBinOutputFile")
+    exec -a "$0" "$OriginalTool" "${ArgsPassToOrigin[@]}" "${BuildSotBinaryArgs[@]}"
+  else
+    echo "run sot swift compile for module"
+    # generated the bc version first
+    CompileOriginArgs=("-emit-bc")
+    "$NowDir/sotcall_exec.sh" "${ArgsPassToOrigin[@]}" "${CompileOriginArgs[@]}" "$OriginalTool" "$0"
+    exit 0
+    # then the normal one
+    exec -a "$0" "$OriginalTool" "${ArgsPassToOrigin[@]}"
+  fi
+else
+  . "$NowDir/sotcall_origin.sh"
+fi    
+
+echo "error: shouldn't come here"
+exit 1
