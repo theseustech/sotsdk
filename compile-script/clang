@@ -1,0 +1,80 @@
+#!/bin/bash
+NowDir="$(dirname "$0")"
+OriginalTool=${NowDir}/clang_origin
+
+# exec -a $0 $OriginalTool "$@"
+let FromClang=1
+let FromSwift=0
+
+. "$NowDir/sot_setup.sh"
+if [ $EnableSot -eq 1 ];then
+	if [ $bIsLinking -eq 1 ]; then
+		. "$NowDir/sot_link.sh"
+	else
+		echo "run sot clang compile 1.18"
+		# test white black mode
+		SotModuleName=${AllArgsArr[$ArgSotModuleNameIndex]}
+		WhiteFileList=WhiteList_$SotModuleName[@]
+		BlackFileList=BlackList_$SotModuleName[@]
+
+		bIsWhiteListMode=0
+		bIsBlackListMode=0
+		bIsBlackFile=0
+
+		for Symbol in "${!WhiteFileList}"
+		do
+			let bIsWhiteListMode=1
+			break
+		done
+
+		if [ $bIsWhiteListMode -eq 0 ];then
+			for Symbol in "${!BlackFileList}"
+			do
+				let bIsBlackListMode=1
+				break
+			done
+		fi
+
+		if [ $bIsWhiteListMode -eq 1 ];then
+			OriginalObjFilePath="${AllArgsArr[$ArgOutputIndex]}"
+			OriginalObjFileName="$(basename "$OriginalObjFilePath")"
+			OriginalObjFileNameNoExt=${OriginalObjFileName%.*}
+			let bIsBlackFile=1
+			for Symbol in "${!WhiteFileList}"
+			do
+				if [[ $OriginalObjFileNameNoExt == $Symbol ]];then
+					let bIsBlackFile=0
+					break
+				fi
+			done
+		elif [ $bIsBlackListMode -eq 1 ];then
+			OriginalObjFilePath="${AllArgsArr[$ArgOutputIndex]}"
+			OriginalObjFileName="$(basename "$OriginalObjFilePath")"
+			OriginalObjFileNameNoExt=${OriginalObjFileName%.*}
+			for Symbol in "${!BlackFileList}"
+			do
+				if [[ $OriginalObjFileNameNoExt == $Symbol ]];then
+					let bIsBlackFile=1
+					break
+				fi
+			done
+		fi
+		
+		#compile out original objectfile to let xcode buildgraph work normally
+		CompileOriginArgs=("-o" "${AllArgsArr[$ArgOutputIndex]}")
+		"$NowDir/sotcall_exec.sh" "${ArgsPassToOrigin[@]}" "${CompileOriginArgs[@]}" "$OriginalTool" "$0"
+
+		if [ $bIsBlackFile -eq 0 ];then
+			SotBinOutputFile="$IntermediateOutputDir/$OutputFileNameNoExtension.sot"
+			BuildSotBinaryArgs=("-fno-objc-msgsend-selector-stubs" "-emit-llvm")
+			exec -a "$0" "$OriginalTool" "${ArgsPassToOrigin[@]}" "${BuildSotBinaryArgs[@]}" "${SotBinOutputFiles[@]}"
+		else
+			exit 0
+		fi
+	fi
+else
+	. "$NowDir/sotcall_origin.sh"
+fi
+
+echo "error: shouldn't come here"
+exit 1

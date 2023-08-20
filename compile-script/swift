@@ -1,0 +1,36 @@
+#!/bin/bash
+NowDir="$(dirname "$0")"
+OriginalTool=${NowDir}/swift_origin
+if [ ! -e $OriginalTool ];then
+  OriginalTool=${NowDir}/swift-frontend_origin
+fi
+#exec -a $0 $OriginalTool $@
+let FromClang=0
+let FromSwift=1
+. "$NowDir/sot_setup.sh"
+
+if [ $EnableSot -eq 1 ];then
+  if [ ! $ArgOutputIndex -eq -1 ]; then
+    echo "run sot swift compile for file 1.18"
+    #compile out original objectfile to let xcode buildgraph work normally
+    CompileOriginArgs=("${OriginOutputFile[@]}")
+    "$NowDir/sotcall_exec.sh" "${ArgsPassToOrigin[@]}" "${CompileOriginArgs[@]}" "$OriginalTool" "$0"
+
+    BuildSotBinaryArgs=("${SotBinOutputFiles[@]}")
+    exec -a "$0" "$OriginalTool" "${ArgsPassToOrigin[@]}" "${BuildSotBinaryArgs[@]}" "-emit-bc"
+  else
+    echo "run sot swift compile for module"
+    # generated the bc version first
+    CompileOriginArgs=("-emit-bc")
+    # CompileOriginArgs=("-emit-bc" "-disable-batch-mode")
+    "$NowDir/sotcall_exec.sh" "${ArgsPassToOrigin[@]}" "${CompileOriginArgs[@]}" "${SwiftSotOutputArgs[@]}" "$OriginalTool" "$0"
+    # then the normal one, make the build graph work normally
+    exec -a "$0" "$OriginalTool" "${ArgsPassExcludeSotArgs[@]}"
+  fi
+else
+  # . "$NowDir/sotcall_origin.sh"
+  exec -a "$0" "$OriginalTool" "${ArgsPassExcludeSotArgs[@]}"
+fi    
+
+echo "error: shouldn't come here"
+exit 1
