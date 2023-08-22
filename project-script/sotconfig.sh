@@ -1,6 +1,6 @@
 #config project's sot setting
 EnableSot=1
-GenerateSotShip=1
+GenerateSotShip=0
 
 # UnlinkSymbols_MODULENAME=("symbol1" "symbol2" "[\s\S]*")
 # IgnoreSymbols_MODULENAME=("symbol1" "symbol2" "[\s\S]*")
