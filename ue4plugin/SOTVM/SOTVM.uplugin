@@ -1,0 +1,24 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "SOT Virtual Machine",
+	"Description": "SOT SDK for ue4, enable iOS hotfix feature.",
+	"Category": "CPP",
+	"CreatedBy": "https://www.sotvm.com",
+	"CreatedByURL": "",
+	"DocsURL": "https://www.sotvm.com/doc/ue4",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"EnabledByDefault": true,
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "SOTVM",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}

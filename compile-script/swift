@@ -11,7 +11,7 @@ let FromSwift=1
 
 if [ $EnableSot -eq 1 ];then
   if [ ! $ArgOutputIndex -eq -1 ]; then
-    echo "run sot swift compile for file 1.18"
+    echo "run sot swift compile for file 1.19"
     #compile out original objectfile to let xcode buildgraph work normally
     CompileOriginArgs=("${OriginOutputFile[@]}")
     "$NowDir/sotcall_exec.sh" "${ArgsPassToOrigin[@]}" "${CompileOriginArgs[@]}" "$OriginalTool" "$0"

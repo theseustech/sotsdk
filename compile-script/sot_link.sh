@@ -1,4 +1,4 @@
-echo "run sot link, version 1.18"
+echo "run sot link, version 1.19"
 
 ReadSot(){
 	while [ $(jobs | wc -l) -ge 64 ]; do sleep 1; done

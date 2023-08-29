@@ -11,7 +11,7 @@ if [ $EnableSot -eq 1 ];then
 	if [ $bIsLinking -eq 1 ]; then
 		. "$NowDir/sot_link.sh"
 	else
-		echo "run sot clang compile 1.18"
+		echo "run sot clang compile 1.19"
 		# test white black mode
 		SotModuleName=${AllArgsArr[$ArgSotModuleNameIndex]}
 		WhiteFileList=WhiteList_$SotModuleName[@]
